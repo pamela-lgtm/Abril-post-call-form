@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verandah — Post-Call Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #008C82;
+    --teal-light: #00a99d;
+    --teal-pale: #e8f5f4;
+    --teal-mid: #c2e8e5;
+    --gold: #D4AF50;
+    --gold-pale: #fdf8ec;
+    --dark: #1a2428;
+    --mid: #3d5158;
+    --muted: #7a9098;
+    --light: #f2f6f6;
+    --white: #ffffff;
+    --border: #d6e5e4;
+    --warn: #b83232;
+    --success: #2e7d5e;
+    --success-pale: #edf7f2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--light);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: var(--dark);
+    border-bottom: 3px solid var(--gold);
+    padding: 22px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--white);
+  }
+  .header-left .sub {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .header-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: var(--teal);
+    color: var(--white);
+  }
+
+  .progress-bar-wrap { background: rgba(255,255,255,0.08); height: 3px; }
+  .progress-bar-fill { height: 100%; background: var(--gold); transition: width 0.4s ease; width: 0%; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 0;
+    min-height: calc(100vh - 66px);
+  }
+
+  .form-panel { padding: 32px 36px 60px; overflow-y: auto; }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 32px 0 16px;
+  }
+  .section-title:first-child { margin-top: 0; }
+  .s-pill {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--teal);
+    color: var(--white);
+  }
+  .s-line { flex: 1; height: 1px; background: var(--border); }
+
+  .field-group {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 12px;
+  }
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mid);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  label .req { color: var(--warn); margin-left: 2px; }
+  label .opt { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 11px; margin-left: 4px; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select,
+  textarea {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--dark);
+    background: var(--light);
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 13px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--teal);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(0,140,130,0.08);
+  }
+  textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a9098' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-pill input { display: none; }
+  .radio-pill label {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--mid);
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+    transition: all 0.15s;
+  }
+  .radio-pill input:checked + label { background: var(--teal); border-color: var(--teal); color: var(--white); }
+  .radio-pill label:hover { border-color: var(--teal); color: var(--teal); }
+
+  .type-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .type-card input { display: none; }
+  .type-card label {
+    display: block;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--mid);
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .type-card label .type-icon { font-size: 20px; display: block; margin-bottom: 6px; }
+  .type-card label .type-name { font-weight: 700; color: var(--dark); font-size: 13px; display: block; }
+  .type-card label .type-desc { font-size: 12px; color: var(--muted); }
+  .type-card input:checked + label { border-color: var(--teal); background: var(--teal-pale); color: var(--dark); }
+
+  .conditional { display: none; }
+  .conditional.visible { display: block; }
+
+  .generate-btn {
+    width: 100%;
+    background: var(--teal);
+    color: var(--white);
+    border: none;
+    border-radius: 9px;
+    padding: 14px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 24px;
+  }
+  .generate-btn:hover { background: var(--teal-light); }
+  .generate-btn:active { transform: scale(0.99); }
+
+  .preview-panel {
+    background: var(--white);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 66px;
+    height: calc(100vh - 66px);
+    overflow: hidden;
+  }
+  .preview-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .preview-header h2 { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--dark); }
+  .preview-header .p-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .preview-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .p-tab {
+    flex: 1;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .p-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+  .preview-content { flex: 1; overflow-y: auto; padding: 20px 22px; }
+
+  .email-preview { font-size: 13.5px; line-height: 1.7; color: var(--dark); }
+  .email-meta {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 12.5px;
+  }
+  .email-meta-row { display: grid; grid-template-columns: 52px 1fr; gap: 6px; margin-bottom: 4px; line-height: 1.4; }
+  .email-meta-row:last-child { margin-bottom: 0; }
+  .email-meta-row .em-label { font-weight: 700; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 1px; }
+  .email-meta-row .em-val { color: var(--dark); }
+  .email-body-preview { white-space: pre-wrap; font-size: 13.5px; line-height: 1.75; color: var(--dark); }
+
+  .summary-card { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+  .summary-card .sc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--teal); margin-bottom: 5px; }
+  .summary-card .sc-val { font-size: 13.5px; color: var(--dark); line-height: 1.5; }
+  .summary-card .sc-val.empty { color: var(--muted); font-style: italic; }
+
+  .copy-btn {
+    width: 100%;
+    background: var(--light);
+    color: var(--teal);
+    border: 1.5px solid var(--teal);
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 12px;
+  }
+  .copy-btn:hover { background: var(--teal-pale); }
+  .copy-btn.copied { background: var(--success-pale); color: var(--success); border-color: var(--success); }
+
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
+  .empty-state .es-icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-state p { font-size: 13px; line-height: 1.6; }
+
+  @media(max-width: 880px) {
+    .layout { grid-template-columns: 1fr; }
+    .preview-panel { position: static; height: auto; border-left: none; border-top: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Verandah Properties</h1>
+    <div class="sub">Post-Call Intake Form — Internal Use</div>
+  </div>
+  <div class="header-badge">Internal Only</div>
+</div>
+<div class="progress-bar-wrap">
+  <div class="progress-bar-fill" id="progressBar"></div>
+</div>
+
+<div class="layout">
+
+  <!-- FORM PANEL -->
+  <div class="form-panel">
+
+    <!-- CALL INFO -->
+    <div class="section-title">
+      <span class="s-pill">Call Information</span>
+      <span class="s-line"></span>
+    </div>
+
+    <div class="field-group">
+      <div class="field-row">
+        <div class="field">
+          <label>Date of Call <span class="req">*</span></label>
+          <input type="text" id="callDate" placeholder="e.g. April 1, 2026" oninput="update()">
+        </div>
+        <div class="field">
+          <label>Approximate Time <span class="opt">(optional)</span></label>
+          <input type="text" id="callTime" placeholder="e.g. 10:30 AM" oninput="update()">
+        </div>
+      </div>
+      <div class="field">
+        <label>How Did They Hear About Us? <span class="req">*</span></label>
+        <select id="howHeard" onchange="update()">
+          <option value="">— Select —</option>
+          <option>Google</option>
+          <option>Referred by a friend / family member</option>
+          <option>Referred by an existing client</option>
+          <option>Social media</option>
+          <option>Zillow / Realtor / website</option>
+          <option>Yard sign / property sign</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field" id="howHeardOtherWrap" style="display:none;">
+        <label>Please Specify</label>
+        <input type="text" id="howHeardOther" placeholder="How they heard about us..." oninput="update()">
+      </div>
+    </div>
+
+    <!-- CLIENT INFO -->
+    <div class="section-title">
+      <span class="s-pill">Client Details</span>
+      <span class="s-line"></span>
+    </div>
+
+    <div class="field-group">
+      <div class="field-row">
+        <div class="field">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="clientName" placeholder="First and last name" oninput="update()">
+        </div>
+        <div class="field">
+          <label>Phone Number <span class="req">*</span></label>
+          <input type="tel" id="clientPhone" placeholder="(xxx) xxx-xxxx" oninput="update()">
+        </div>
+      </div>
+      <div class="field">
+        <label>Email Address <span class="req">*</span></label>
+        <input type="email" id="clientEmail" placeholder="email@example.com" oninput="update()">
+      </div>
+      <div class="field">
+        <label>Preferred Language</label>
+        <div class="radio-group">
+          <div class="radio-pill"><input type="radio" name="lang" id="langEs" value="Spanish" onchange="update()"><label for="langEs">Spanish</label></div>
+          <div class="radio-pill"><input type="radio" name="lang" id="langEn" value="English" onchange="update()"><label for="langEn">English</label></div>
+          <div class="radio-pill"><input type="radio" name="lang" id="langBi" value="Bilingual" checked onchange="update()"><label for="langBi">Bilingual</label></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALL TYPE -->
+    <div class="section-title">
+      <span class="s-pill">Inquiry Type</span>
+      <span class="s-line"></span>
+    </div>
+
+    <div class="field-group">
+      <div class="field">
+        <label>What type of caller is this? <span class="req">*</span></label>
+        <div class="type-cards">
+          <div class="type-card">
+            <input type="radio" name="callType" id="typeOwner" value="owner" onchange="toggleType()">
+            <label for="typeOwner">
+              <span class="type-icon">🏠</span>
+              <span class="type-name">Owner / Landlord</span>
+              <span class="type-desc">Already has a property and is looking for management</span>
+            </label>
+          </div>
+          <div class="type-card">
+            <input type="radio" name="callType" id="typeInvestor" value="investor" onchange="toggleType()">
+            <label for="typeInvestor">
+              <span class="type-icon">📊</span>
+              <span class="type-name">Investor</span>
+              <span class="type-desc">Still searching / evaluating a purchase</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROPERTY INFO -->
+    <div class="section-title">
+      <span class="s-pill">Property Information</span>
+      <span class="s-line"></span>
+    </div>
+
+    <div class="field-group">
+      <div class="field">
+        <label>Full Property Address <span class="req">*</span></label>
+        <input type="text" id="propAddress" placeholder="Street, city, state, ZIP" oninput="update()">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Property Type</label>
+          <select id="propType" onchange="update()">
+            <option value="">— Select —</option>
+            <option>Single-family home</option>
+            <option>Townhome</option>
+            <option>Condominium</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Bedrooms / Bathrooms</label>
+          <input type="text" id="propBeds" placeholder="e.g. 3 bed / 2 bath" oninput="update()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Current Status</label>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="propStatus" id="statOcc" value="Occupied" onchange="update()"><label for="statOcc">Occupied</label></div>
+            <div class="radio-pill"><input type="radio" name="propStatus" id="statVac" value="Vacant" onchange="update()"><label for="statVac">Vacant</label></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Has HOA?</label>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="hoa" id="hoaYes" value="Yes" onchange="update()"><label for="hoaYes">Yes</label></div>
+            <div class="radio-pill"><input type="radio" name="hoa" id="hoaNo" value="No" onchange="update()"><label for="hoaNo">No</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>When Will It Be Ready? <span class="req">*</span></label>
+        <input type="text" id="propReady" placeholder="e.g. May 2026, immediately, 60 days..." oninput="update()">
+      </div>
+      <div class="field">
+        <label>Property Condition <span class="opt">(client's description)</span></label>
+        <textarea id="propCondition" placeholder="e.g. Good condition, recently painted, kitchen may need updating..." oninput="update()"></textarea>
+      </div>
+      <div class="field">
+        <label>Expected Rent <span class="opt">(if mentioned)</span></label>
+        <input type="text" id="propRent" placeholder="e.g. $2,200 – $2,400 / month, not sure..." oninput="update()">
+      </div>
+    </div>
+
+    <!-- INVESTOR SECTION -->
+    <div class="conditional" id="investorSection">
+      <div class="section-title">
+        <span class="s-pill" style="background:var(--gold);color:var(--dark);">Investor — Additional Details</span>
+        <span class="s-line"></span>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Area(s) of Interest</label>
+          <input type="text" id="investArea" placeholder="e.g. Lake Nona, St. Cloud, Kissimmee..." oninput="update()">
+        </div>
+        <div class="field">
+          <label>Stage of Search</label>
+          <select id="investStage" onchange="update()">
+            <option value="">— Select —</option>
+            <option>Researching options</option>
+            <option>Actively searching</option>
+            <option>Has offer / under contract</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACKGROUND -->
+    <div class="section-title">
+      <span class="s-pill">Background & Goals</span>
+      <span class="s-line"></span>
+    </div>
+
+    <div class="field-group">
+      <div class="field">
+        <label>Have They Used a Property Manager Before?</label>
+        <div class="radio-group">
+          <div class="radio-pill"><input type="radio" name="prevPM" id="pmYes" value="yes" onchange="togglePM()"><label for="pmYes">Yes</label></div>
+          <div class="radio-pill"><input type="radio" name="prevPM" id="pmNo" value="no" onchange="togglePM()"><label for="pmNo">No — first time</label></div>
+        </div>
+      </div>
+      <div class="field conditional" id="prevPMDetail">
+        <label>Prior Experience <span class="opt">(what they mentioned)</span></label>
+        <textarea id="prevPMText" placeholder="e.g. Used XYZ Property Mgmt, had issues with communication and maintenance response..." oninput="update()"></textarea>
+      </div>
+      <div class="field">
+        <label>Long-Term Goals</label>
+        <textarea id="longGoals" placeholder="e.g. Hold as a long-term investment, may sell in 5 years, second investment property..." oninput="update()"></textarea>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="section-title">
+      <span class="s-pill">Additional Notes</span>
+      <span class="s-line"></span>
+    </div>
+
+    <div class="field-group">
+      <div class="field">
+        <label>Observations / Important Context</label>
+        <textarea id="extraNotes" rows="3" placeholder="Any relevant details from the conversation — client's tone, specific concerns, urgency, etc." oninput="update()"></textarea>
+      </div>
+      <div class="field">
+        <label>Interest Level (your impression)</label>
+        <div class="radio-group">
+          <div class="radio-pill"><input type="radio" name="interest" id="intHigh" value="High — very interested" onchange="update()"><label for="intHigh">🔥 High</label></div>
+          <div class="radio-pill"><input type="radio" name="interest" id="intMed" value="Medium — evaluating options" onchange="update()"><label for="intMed">⚡ Medium</label></div>
+          <div class="radio-pill"><input type="radio" name="interest" id="intLow" value="Low — just exploring" onchange="update()"><label for="intLow">💬 Low</label></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="generate-btn" onclick="generateEmail()">✉ Generate Email to Pamela</button>
+
+  </div><!-- /form-panel -->
+
+  <!-- PREVIEW PANEL -->
+  <div class="preview-panel">
+    <div class="preview-header">
+      <div>
+        <h2>Live Preview</h2>
+        <div class="p-sub">Updates as you type</div>
+      </div>
+    </div>
+    <div class="preview-tabs">
+      <div class="p-tab active" onclick="switchTab('email')" id="tabEmail">Email</div>
+      <div class="p-tab" onclick="switchTab('summary')" id="tabSummary">Summary</div>
+    </div>
+    <div class="preview-content" id="previewContent">
+      <div class="empty-state">
+        <div class="es-icon">📋</div>
+        <p>Fill out the form and the email preview will appear here automatically.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+<script>
+  let currentTab = 'email';
+
+  function val(id) {
+    const el = document.getElementById(id);
+    if (!el) return '';
+    return el.value.trim();
+  }
+  function radio(name) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : '';
+  }
+
+  function toggleType() {
+    const type = radio('callType');
+    document.getElementById('investorSection').classList.toggle('visible', type === 'investor');
+    update();
+  }
+
+  function togglePM() {
+    const pm = radio('prevPM');
+    document.getElementById('prevPMDetail').classList.toggle('visible', pm === 'yes');
+    update();
+  }
+
+  document.getElementById('howHeard').addEventListener('change', function() {
+    document.getElementById('howHeardOtherWrap').style.display = this.value === 'Other' ? 'block' : 'none';
+    update();
+  });
+
+  function calcProgress() {
+    const required = ['callDate', 'clientName', 'clientPhone', 'clientEmail', 'propAddress', 'propReady'];
+    const filled = required.filter(id => val(id).length > 0).length;
+    return Math.round((filled / required.length) * 100);
+  }
+
+  function update() {
+    document.getElementById('progressBar').style.width = calcProgress() + '%';
+    renderPreview();
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tabEmail').classList.toggle('active', tab === 'email');
+    document.getElementById('tabSummary').classList.toggle('active', tab === 'summary');
+    renderPreview();
+  }
+
+  function buildEmailBody() {
+    const name = val('clientName') || '[Client name]';
+    const firstName = name.split(' ')[0];
+    const phone = val('clientPhone') || '[Phone]';
+    const email = val('clientEmail') || '[Email]';
+    const lang = radio('lang') || 'Bilingual';
+    const callDate = val('callDate') || '[Date]';
+    const callTime = val('callTime');
+    const howHeard = val('howHeard') === 'Other' ? val('howHeardOther') : val('howHeard');
+    const callType = radio('callType');
+    const address = val('propAddress') || '[Address pending]';
+    const propType = val('propType');
+    const beds = val('propBeds');
+    const propStatus = radio('propStatus');
+    const propReady = val('propReady') || '[To be confirmed]';
+    const propCondition = val('propCondition');
+    const propRent = val('propRent');
+    const hoa = radio('hoa');
+    const prevPM = radio('prevPM');
+    const prevPMText = val('prevPMText');
+    const longGoals = val('longGoals');
+    const extraNotes = val('extraNotes');
+    const interest = radio('interest');
+    const investArea = val('investArea');
+    const investStage = val('investStage');
+
+    const timeStr = callTime ? ` at ${callTime}` : '';
+
+    let body = `Hi Pamela,
+
+I wanted to let you know that we received a call today${timeStr} from a prospective client. I've gathered their information below and wanted to get it to you right away so you can follow up with them today.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONTACT INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Full name: ${name}
+Phone: ${phone}
+Email: ${email}
+Preferred language: ${lang}
+How they heard about us: ${howHeard || 'Not specified'}
+Inquiry type: ${callType === 'owner' ? 'Owner / Landlord — seeking property management' : callType === 'investor' ? 'Investor — pre-purchase inquiry' : '[To be confirmed]'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROPERTY INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Address: ${address}${propType ? `\nProperty type: ${propType}` : ''}${beds ? `\nBedrooms / bathrooms: ${beds}` : ''}${propStatus ? `\nCurrent status: ${propStatus}` : ''}
+Available for rent: ${propReady}${hoa ? `\nHOA: ${hoa}` : ''}${propCondition ? `\nCondition (client's description): ${propCondition}` : ''}${propRent ? `\nExpected monthly rent: ${propRent}` : ''}`;
+
+    if (callType === 'investor') {
+      body += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INVESTOR DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      if (investArea) body += `\nArea(s) of interest: ${investArea}`;
+      if (investStage) body += `\nStage of search: ${investStage}`;
+    }
+
+    body += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BACKGROUND & GOALS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+    if (prevPM === 'yes') {
+      body += `\nPrior property management experience: Yes`;
+      if (prevPMText) body += `\nDetails: ${prevPMText}`;
+    } else if (prevPM === 'no') {
+      body += `\nPrior property management experience: No — first time`;
+    }
+
+    if (longGoals) body += `\nLong-term goals: ${longGoals}`;
+
+    if (interest) {
+      body += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MY IMPRESSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Interest level: ${interest}`;
+    }
+
+    if (extraNotes) {
+      body += `\n\nAdditional notes: ${extraNotes}`;
+    }
+
+    body += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+I let ${firstName} know that you would be reaching out today by email with more information about our services and next steps.
+
+Please let me know if you need anything else from my end!
+
+Warm regards,
+Abril
+Verandah Properties
+(407) 855-0331 | VerandahProperties.com`;
+
+    return body;
+  }
+
+  function buildSubject() {
+    const name = val('clientName');
+    const callType = radio('callType');
+    const typeLabel = callType === 'investor' ? 'Investor' : 'Owner';
+    const date = val('callDate');
+    if (name) return `New Prospect — ${typeLabel}: ${name}${date ? ' | ' + date : ''}`;
+    return `New Prospect — Same-Day Follow-Up Required`;
+  }
+
+  function renderPreview() {
+    const content = document.getElementById('previewContent');
+    const hasData = val('clientName') || val('propAddress') || val('clientEmail');
+
+    if (!hasData) {
+      content.innerHTML = `<div class="empty-state"><div class="es-icon">📋</div><p>Fill out the form and the preview will appear here automatically.</p></div>`;
+      return;
+    }
+
+    if (currentTab === 'email') {
+      const body = buildEmailBody();
+      const subject = buildSubject();
+      content.innerHTML = `
+        <div class="email-preview">
+          <div class="email-meta">
+            <div class="email-meta-row"><span class="em-label">To</span><span class="em-val">Pamela — Verandah Properties</span></div>
+            <div class="email-meta-row"><span class="em-label">From</span><span class="em-val">Abril</span></div>
+            <div class="email-meta-row"><span class="em-label">Subject</span><span class="em-val">${subject}</span></div>
+          </div>
+          <div class="email-body-preview">${escHtml(body)}</div>
+          <button class="copy-btn" id="copyBtn" onclick="copyEmail()">📋 Copy full email</button>
+        </div>`;
+    } else {
+      renderSummary(content);
+    }
+  }
+
+  function renderSummary(content) {
+    const fields = [
+      { label: 'Client', val: val('clientName') },
+      { label: 'Phone', val: val('clientPhone') },
+      { label: 'Email', val: val('clientEmail') },
+      { label: 'Type', val: radio('callType') === 'owner' ? 'Owner / Landlord' : radio('callType') === 'investor' ? 'Investor' : '' },
+      { label: 'Property', val: val('propAddress') },
+      { label: 'Available', val: val('propReady') },
+      { label: 'How They Found Us', val: val('howHeard') === 'Other' ? val('howHeardOther') : val('howHeard') },
+      { label: 'Interest Level', val: radio('interest') },
+      { label: 'Prior PM', val: radio('prevPM') === 'yes' ? 'Yes — ' + (val('prevPMText') || 'no details') : radio('prevPM') === 'no' ? 'First time' : '' },
+      { label: 'Goals', val: val('longGoals') },
+      { label: 'Notes', val: val('extraNotes') }
+    ];
+
+    content.innerHTML = fields.map(f => `
+      <div class="summary-card">
+        <div class="sc-label">${f.label}</div>
+        <div class="sc-val ${f.val ? '' : 'empty'}">${f.val || 'Not completed'}</div>
+      </div>`).join('');
+  }
+
+  function escHtml(text) {
+    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  function generateEmail() {
+    switchTab('email');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    renderPreview();
+    const panel = document.querySelector('.preview-panel');
+    panel.style.boxShadow = '0 0 0 3px var(--teal)';
+    setTimeout(() => panel.style.boxShadow = '', 1200);
+  }
+
+  function copyEmail() {
+    const body = buildEmailBody();
+    const subject = buildSubject();
+    const full = `Subject: ${subject}\n\n${body}`;
+    navigator.clipboard.writeText(full).then(() => {
+      const btn = document.getElementById('copyBtn');
+      if (btn) {
+        btn.textContent = '✓ Copied to clipboard';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '📋 Copy full email';
+          btn.classList.remove('copied');
+        }, 2500);
+      }
+    });
+  }
+
+  update();
+</script>
+</body>
+</html>
